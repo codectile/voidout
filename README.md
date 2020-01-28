@@ -1,2 +1,2 @@
 # voidout
-a very basic game engine
+Work in progress...
