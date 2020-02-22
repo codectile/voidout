@@ -19,7 +19,7 @@ float Perlin::get_smooth_noise(int x, int y) const
 
 float Perlin::interpolate(float x, float y, float blend) const
 {
-	float theta = blend * VT_PI;
+	float theta = blend * LM_PI;
 	float f = (float)((1.f - cos(theta)) * 0.5f);
 	return x * (1 - f) + y * f;
 }

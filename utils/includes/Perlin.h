@@ -2,7 +2,7 @@
 
 #include <random>
 #include <iostream>
-#include "vtMathConstants.h"
+#include "MathConstants.h"
 
 //Credits: https://web.archive.org/web/20160530124230/http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
 class Perlin

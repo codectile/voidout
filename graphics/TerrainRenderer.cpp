@@ -1,13 +1,25 @@
 #include "TerrainRenderer.h"
 #include "Perlin.h"
 #include <iostream>
+#include <cmath>
 
-TerrainRenderer::TerrainRenderer(const ShaderHelper& sh, unsigned int dim) : RendererCommon(sh)
+TerrainRenderer::TerrainRenderer(const ShaderHelper& sh, unsigned int dim, int octaves, int amplitude, float roughness) : RendererCommon(sh)
 {
 	//int shader_id = m_shader.get_id();
 	std::vector<Vertex>vertices;
-	Perlin p(4, 10, 0.1f);
-	float heights[50][50];
+	Perlin p(octaves, amplitude, roughness);
+	std::vector<std::vector<float>> heights(dim, std::vector<float>(dim));
+	glm::vec3 color4(255 / 255.f, 255 / 255.f, 255 / 255.f);
+	glm::vec3 color2(204 / 255.f, 164 / 255.f, 108 / 255.f);
+	glm::vec3 color3(158 / 255.f, 119 / 255.f, 65 / 255.f);
+	glm::vec3 color1(136 / 255.f, 207 / 255.f, 4 / 255.f);
+	glm::vec3 color0(255 / 255.f, 255 / 255.f, 94 / 255.f);
+
+	auto lerp = [](float a, float b, float f)
+	{
+		//return a + f * (b - a);
+		return (1 - f) * a + f * b;
+	};
 	for (int i = 0; i < dim; i++)
 	{
 		for (int j = 0; j < dim; j++)
@@ -16,8 +28,30 @@ TerrainRenderer::TerrainRenderer(const ShaderHelper& sh, unsigned int dim) : Ren
 			heights[i][j] = p.perlin(static_cast<float>(i), static_cast<float>(j));
 			Vertex v;
 			v.m_position = glm::vec3((float)i, heights[i][j], (float)j);
-
-			v.m_color = glm::vec3(110 / 255.f, 58 / 255.f, 166 / 255.f);
+			if (heights[i][j] >= 2.f && heights[i][j] < 5.f)
+			{
+				v.m_color.x = lerp(color3.x, color2.x, heights[i][j] / 4.f);
+				v.m_color.y = lerp(color3.y, color2.y, heights[i][j] / 4.f);
+				v.m_color.z = lerp(color3.z, color2.z, heights[i][j] / 4.f);
+			}
+			else if (heights[i][j] >= 5.f)
+			{
+				v.m_color.x = lerp(color2.x, color4.x, heights[i][j] / 6.f);
+				v.m_color.y = lerp(color2.y, color4.y, heights[i][j] / 6.f);
+				v.m_color.z = lerp(color2.z, color4.z, heights[i][j] / 6.f);
+			}
+			else if (heights[i][j] < 0.0f )
+			{
+				v.m_color.x = lerp(color1.x, color0.x, fabs(heights[i][j]) / 10.f);
+				v.m_color.y = lerp(color1.y, color0.y, fabs(heights[i][j]) / 10.f);
+				v.m_color.z = lerp(color1.z, color0.z, fabs(heights[i][j]) / 10.f);
+			}
+			else
+			{
+				v.m_color.x = lerp(color1.x, color3.x, heights[i][j] / 3.f);
+				v.m_color.y = lerp(color1.y, color3.y, heights[i][j] / 3.f);
+				v.m_color.z = lerp(color1.z, color3.z, heights[i][j] / 3.f);
+			}
 			vertices.push_back(v);
 		}
 	}
@@ -122,7 +156,7 @@ void TerrainRenderer::render() const
 {
 	
 	glBindVertexArray(m_vao);
-
+	m_shader.set_mat4("model", m_model);
 	glDrawElements(GL_TRIANGLES, (unsigned int)m_index, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }

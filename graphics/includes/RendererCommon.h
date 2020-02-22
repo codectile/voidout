@@ -25,12 +25,17 @@ public:
 	virtual inline void set_world_pos(const glm::vec3 pos)
 	{
 		m_worldpos = pos;
-		m_model = glm::translate(glm::mat4(1.0), m_worldpos);
+		m_model = glm::translate(glm::mat4(1.f), m_worldpos);
 	}
 
 	virtual inline glm::vec3 get_world_pos() const
 	{
 		return m_worldpos;
+	}
+
+	virtual inline void set_transform(const glm::mat4& transform)
+	{
+		m_model = transform;
 	}
 
 	virtual void render() const = 0;
